@@ -1,0 +1,11 @@
+{
+  "mission": "SELENE",
+  "instrument": "Kaguya TC",
+  "sensor": "Terrain Camera",
+  "gsd": 10.0,
+  "sun_azimuth": 225.0,
+  "sun_elevation": 25.0,
+  "incidence_angle": 65.0,
+  "phase_angle": 65.0,
+  "description": "Afternoon sun pass with illumination from South-West (225 deg - 180 deg inverted shadows)"
+}

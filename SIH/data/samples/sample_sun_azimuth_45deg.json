@@ -1,0 +1,11 @@
+{
+  "mission": "LRO",
+  "instrument": "LROC NAC",
+  "sensor": "Narrow Angle Camera",
+  "gsd": 0.5,
+  "sun_azimuth": 45.0,
+  "sun_elevation": 25.0,
+  "incidence_angle": 65.0,
+  "phase_angle": 65.0,
+  "description": "Morning sun pass with illumination from North-East (45 deg)"
+}
