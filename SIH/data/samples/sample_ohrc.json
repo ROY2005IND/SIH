@@ -1,0 +1,13 @@
+{
+  "mission": "Chandrayaan-2",
+  "instrument": "OHRC",
+  "sensor": "Optical High Resolution Camera",
+  "gsd": 0.25,
+  "sun_azimuth": 45.0,
+  "sun_elevation": 30.0,
+  "incidence_angle": 60.0,
+  "emission_angle": 0.0,
+  "phase_angle": 60.0,
+  "wavelength": "Panchromatic (450-900 nm)",
+  "description": "Simulated Chandrayaan-2 OHRC high-resolution observation"
+}

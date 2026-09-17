@@ -1,0 +1,81 @@
+# MOONFLOWER AI — Algorithmic Settings & Thresholds
+# Non-secret scientific configuration
+
+general:
+  app_name: "MoonFlower AI"
+  problem_statement: "ISRO SIH #26166"
+  default_random_seed: 42
+
+preprocessing:
+  default_method: "clahe"
+  clahe:
+    clip_limit: 2.5
+    tile_grid_size: [8, 8]
+  gradient:
+    sobel_ksize: 3
+  edge:
+    canny_low: 50
+    canny_high: 150
+  pyramid:
+    levels: 3
+    scale_factor: 0.5
+
+analysis:
+  image_quality:
+    low_contrast_std: 12.0
+    low_texture_entropy: 3.2
+    max_nodata_fraction: 0.40
+  overlap:
+    coarse_size: 256
+    low_overlap_warning_ratio: 0.35
+
+features:
+  sift:
+    n_features: 5000
+    n_octave_layers: 3
+    contrast_threshold: 0.03
+    edge_threshold: 10.0
+    sigma: 1.6
+  akaze:
+    descriptor_type: 5 # MLDB
+    threshold: 0.001
+
+matching:
+  default_method: "sift"
+  ratio_test: 0.75
+  cross_check: false
+  confidence_threshold: 0.50
+
+registration:
+  default_model: "affine"
+  candidate_models:
+    - "similarity"
+    - "affine"
+    - "homography"
+  ransac:
+    method: "USAC_MAGSAC"
+    threshold: 3.0
+    max_iters: 3000
+    confidence: 0.999
+  non_rigid:
+    enabled: false
+    model: "tps"
+
+spatial:
+  default_grid: 6
+  grid_options: [4, 6, 8]
+  max_matches_per_cell: 20
+  strategy: "adaptive_confidence"
+
+subpixel:
+  enabled: true
+  method: "parabolic"
+  patch_size: 11
+  max_refinement_offset: 1.5
+
+evaluation:
+  quality_score:
+    inlier_ratio_weight: 0.30
+    spatial_coverage_weight: 0.25
+    spatial_uniformity_weight: 0.25
+    residual_stability_weight: 0.20

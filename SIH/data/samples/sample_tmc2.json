@@ -1,0 +1,13 @@
+{
+  "mission": "Chandrayaan-2",
+  "instrument": "TMC-2",
+  "sensor": "Terrain Mapping Camera-2",
+  "gsd": 5.0,
+  "sun_azimuth": 45.0,
+  "sun_elevation": 30.0,
+  "incidence_angle": 60.0,
+  "emission_angle": 0.0,
+  "phase_angle": 60.0,
+  "wavelength": "Panchromatic (500-850 nm)",
+  "description": "Simulated Chandrayaan-2 TMC-2 regional context frame"
+}
