@@ -7,6 +7,32 @@ from .adapters import detect_sensor_adapter, GenericAdapter
 from .pds4_reader import parse_pds4_label
 
 
+def _find_pds4_label(path: Path) -> Path | None:
+    """Locate an authoritative PDS4 label belonging to *path*.
+
+    ISRO archives do not always give the label the same stem as the raster.  A
+    product directory commonly contains ``product.xml`` while the raster is
+    named in the label's ``file_name`` element.  Looking only for
+    ``path.with_suffix('.xml')`` silently drops the geometry in that very
+    common layout.
+    """
+    direct_candidates = (path.with_suffix(".xml"), path.with_suffix(".lbl"))
+    for candidate in direct_candidates:
+        if candidate.is_file():
+            return candidate
+
+    # Keep the search bounded: product folders are expected to be flat and a
+    # label must explicitly name this raster before it is accepted.
+    for candidate in list(path.parent.glob("*.xml")) + list(path.parent.glob("*.lbl")):
+        try:
+            text = candidate.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if path.name.lower() in text.lower():
+            return candidate
+    return None
+
+
 def parse_lunar_metadata(file_path: Path | str, user_override: dict[str, Any] | None = None) -> dict[str, Any]:
     """
     Extract and adapt metadata from a raster file and any associated sidecars.
@@ -15,6 +41,11 @@ def parse_lunar_metadata(file_path: Path | str, user_override: dict[str, Any] | 
     Never invents missing values.
     """
     path = Path(file_path)
+    # This optional UI/API hint permits uploaded PDS4 labels whose filenames
+    # cannot be preserved alongside the uploaded raster.  Do not expose it as
+    # scientific metadata or allow it to affect adapter detection.
+    overrides = dict(user_override or {})
+    explicit_label = overrides.pop("pds4_label_path", None)
     raw_meta: dict[str, Any] = {}
     gsd_provenance = "UNKNOWN"
     detection_confidence = "HINT"
@@ -52,12 +83,13 @@ def parse_lunar_metadata(file_path: Path | str, user_override: dict[str, Any] | 
     # 3. Check for PDS4 XML label (.xml or .lbl sidecar, or file itself)
     pds4_meta = None
     xml_candidate = None
-    if path.suffix.lower() == ".xml":
+    if explicit_label:
+        candidate = Path(explicit_label)
+        xml_candidate = candidate if candidate.is_file() else None
+    elif path.suffix.lower() == ".xml":
         xml_candidate = path
-    elif path.with_suffix(".xml").exists():
-        xml_candidate = path.with_suffix(".xml")
-    elif path.with_suffix(".lbl").exists():
-        xml_candidate = path.with_suffix(".lbl")
+    else:
+        xml_candidate = _find_pds4_label(path)
 
     if xml_candidate is not None:
         pds4_meta = parse_pds4_label(xml_candidate)
@@ -70,11 +102,11 @@ def parse_lunar_metadata(file_path: Path | str, user_override: dict[str, Any] | 
                 detection_confidence = "AUTHORITATIVE"
 
     # 4. Apply user overrides if provided (highest priority)
-    if user_override:
-        raw_meta.update(user_override)
-        if "gsd" in user_override:
+    if overrides:
+        raw_meta.update(overrides)
+        if "gsd" in overrides:
             gsd_provenance = "USER_OVERRIDE"
-        if "instrument" in user_override or "sensor" in user_override:
+        if "instrument" in overrides or "sensor" in overrides:
             detection_confidence = "USER_OVERRIDE"
 
     raw_meta["gsd_provenance"] = gsd_provenance
@@ -83,6 +115,11 @@ def parse_lunar_metadata(file_path: Path | str, user_override: dict[str, Any] | 
     hint = f"{path.name} {raw_meta.get('sensor', '')} {raw_meta.get('instrument', '')} {raw_meta.get('mission', '')}"
     adapter = detect_sensor_adapter(hint)
     standardized = adapter.adapt(raw_meta)
+    # Adapters standardize presentation fields, but geospatial fields (bbox,
+    # map projection parameters, PDS identifiers) must survive for overlap
+    # analysis and audit/export.  Standardized values take precedence only for
+    # the fields the adapter intentionally normalizes.
+    standardized = {**raw_meta, **standardized}
     standardized["source_path"] = str(path)
     standardized["detection_confidence"] = detection_confidence
     standardized["gsd_provenance"] = gsd_provenance

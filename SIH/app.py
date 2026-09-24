@@ -48,132 +48,16 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
-
-    .stApp {
-        background:
-          radial-gradient(circle at 78% 2%, rgba(116,136,147,.12), transparent 28rem),
-          linear-gradient(135deg, #080a0b 0%, #101416 58%, #090b0c 100%);
-        color: #e2e8f0;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-    .stApp:before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.25;
-        background-image:linear-gradient(rgba(177,196,202,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(177,196,202,.035) 1px,transparent 1px);
-        background-size:42px 42px; mask-image:linear-gradient(to bottom,black,transparent 80%); }
-    #MainMenu, footer {visibility:hidden;}
-    .block-container {padding-top:1.2rem; max-width:1540px;}
-    h1,h2,h3 { letter-spacing:-.035em; color:#f0f2ed; }
-    button:focus-visible, [role="tab"]:focus-visible {outline:2px solid #82c7d6!important; outline-offset:3px;}
-
-    /* Opening instrument plate */
-    .lunar-hero {position:relative; overflow:hidden; min-height:345px; padding:32px 37px; margin:4px 0 12px;
-      border:1px solid #465257; background:#131719; isolation:isolate;}
-    .lunar-hero:after {content:""; position:absolute; right:-6%; top:-56%; height:530px; width:530px; z-index:-1; border-radius:50%;
-      background:radial-gradient(circle at 37% 32%,#aeb6b0 0 1%,#77817e 2% 4%,#a6ada6 5% 7%,#59625f 8% 12%,#8c9490 13% 17%,#4d5554 18% 24%,#747d79 25% 31%,#353c3d 32% 40%,#555d5c 41% 52%,#252a2c 53% 100%);
-      filter:contrast(1.15) grayscale(1); opacity:.78; box-shadow:inset -40px -35px 70px #121718; animation:moon-drift 18s ease-in-out infinite alternate;}
-    .hero-kicker,.eyebrow {font:600 .7rem 'JetBrains Mono',monospace; letter-spacing:.17em; color:#a8d6dd; text-transform:uppercase;}
-    .lunar-hero h1 {max-width:690px; margin:.45rem 0 .3rem; font-size:clamp(2.7rem,6vw,6.1rem); line-height:.86; font-weight:700;}
-    .hero-sub {max-width:570px; font:500 clamp(.78rem,1.4vw,1rem) 'JetBrains Mono',monospace; letter-spacing:.08em; line-height:1.55; color:#c5cecc;}
-    .hero-copy {max-width:545px; margin-top:16px; color:#aeb9b8; line-height:1.55;}
-    .hero-readout {position:absolute; right:28px; bottom:24px; width:min(36vw,390px); padding:13px; background:rgba(8,11,12,.67); border:1px solid rgba(202,216,212,.35); font:500 .66rem 'JetBrains Mono',monospace; color:#c9d6d4;}
-    .hero-readout span {color:#81cbd7;}
-    .orbital {position:absolute; width:580px;height:210px;right:-40px;bottom:-55px;border:1px solid rgba(152,207,217,.43);border-radius:50%; transform:rotate(-18deg);z-index:-1;}
-    .orbital:after {content:""; position:absolute;width:8px;height:8px; border-radius:50%;background:#9cdbe3;left:26%;top:4%;box-shadow:0 0 0 4px rgba(156,219,227,.16);}
-    .mission-status {display:grid;grid-template-columns:repeat(5,1fr); border:1px solid #3c4749; background:#111516; margin-bottom:24px;}
-    .mission-status div {padding:12px 15px;border-right:1px solid #30393b; min-width:0;}
-    .mission-status div:last-child{border-right:0}.mission-status b{display:block;font:600 .64rem 'JetBrains Mono',monospace;letter-spacing:.12em;color:#7e9294}.mission-status span{display:block;font:600 .76rem 'JetBrains Mono',monospace;color:#e1e8e5;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ready-dot{color:#a6dba7!important;}
-
-    /* Top Telemetry Banner */
-    .telemetry-bar {
-        background: #121617;
-        border: 1px solid #384447;
-        border-radius: 0;
-        padding: 10px 18px;
-        margin-bottom: 20px;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: none;
-    }
-    .telemetry-item {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.82rem;
-        color: #94a3b8;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-    .telemetry-val {
-        color: #9dd6dd;
-        font-weight: 600;
-    }
-    .status-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background-color: #22c55e;
-        display: inline-block;
-        box-shadow: none;
-    }
-
-    /* Aerospace Cards */
-    .mission-card {
-        background-color: rgba(21,26,27,.94);
-        border: 1px solid #394447;
-        border-radius: 0;
-        padding: 16px;
-        margin-bottom: 16px;
-    }
-    .mission-header {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.84rem;
-        font-weight: 600;
-        color: #a1d5dc;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin-bottom: 10px;
-        border-bottom: 1px solid #1e293b;
-        padding-bottom: 6px;
-    }
-    .metric-badge {
-        font-family: 'JetBrains Mono', monospace;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 0.82rem;
-        font-weight: 600;
-        display: inline-block;
-    }
-    .badge-green { background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); }
-    .badge-cyan { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
-    .badge-yellow { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
-    .badge-purple { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
-    .badge-red { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
-
-    /* Timeline Stepper */
-    .timeline-container {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 20px;
-        background: #151a1b;
-        padding: 12px;
-        border-radius: 0;
-        border: 1px solid #394447;
-    }
-    .timeline-step {
-        text-align: center;
-        flex: 1;
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.76rem;
-    }
-    .timeline-step.active {
-        color: #38bdf8;
-        font-weight: 700;
-    }
-    .timeline-step.done {
-        color: #b8d9b4;
-    }
-    .pipeline-nav{display:flex;align-items:stretch;margin:0 0 20px;border-top:1px solid #3c4749;border-bottom:1px solid #3c4749;background:#111516;overflow:auto}.pipeline-stage{min-width:125px;position:relative;padding:14px 10px 12px;text-align:center;border-right:1px solid #30393b}.pipeline-stage:last-child{border:0}.pipeline-stage strong{display:block;font:600 .69rem 'JetBrains Mono',monospace;letter-spacing:.08em}.pipeline-stage small{display:block;color:#829094;font-size:.68rem;margin-top:4px}.pipeline-stage .pipe-dot{display:inline-block;color:#8b9898;margin-right:4px}.pipeline-stage.complete .pipe-dot{color:#b2d7ad}.pipeline-stage.active{background:#1a2628}.pipeline-stage.active:after{content:"";position:absolute;height:2px;left:12px;right:12px;bottom:0;background:#82c7d6;animation:signal 1.4s ease-in-out infinite}.pipeline-stage.active .pipe-dot{color:#91d5df}.instrument-panel{border:1px solid #3c4749;background:#111516;padding:16px;margin-bottom:15px}.instrument-panel .panel-title{font:600 .73rem 'JetBrains Mono',monospace;letter-spacing:.12em;color:#abd5da;border-bottom:1px solid #344043;padding-bottom:8px;margin-bottom:11px}.radar{width:170px;aspect-ratio:1;border-radius:50%;border:1px solid #7faab0;position:relative;margin:8px auto;background:repeating-radial-gradient(circle,transparent 0 24%,rgba(127,170,176,.14) 25% 26%),linear-gradient(45deg,transparent 49.5%,rgba(127,170,176,.22) 50% 50.7%,transparent 51%),linear-gradient(-45deg,transparent 49.5%,rgba(127,170,176,.22) 50% 50.7%,transparent)}.radar:before{content:"";position:absolute;inset:28%;border-radius:50%;background:#9ad4dc;opacity:.75}.radar-label{text-align:center;font:600 .66rem 'JetBrains Mono',monospace;letter-spacing:.1em;color:#a8d6dd}.stTabs [data-baseweb="tab-list"]{gap:3px;border-bottom:1px solid #3c4749}.stTabs [data-baseweb="tab"]{background:#111516;border:1px solid #3c4749;border-bottom:0;border-radius:0;color:#aab8b7;padding:9px 13px}.stTabs [aria-selected="true"]{background:#1b2729!important;color:#dcf0ef!important}.stButton>button{border-radius:0!important;border:1px solid #86c9d3!important;background:#1c3437!important;color:#e7f7f5!important;font:600 .72rem 'JetBrains Mono',monospace;letter-spacing:.06em}.stButton>button:hover{background:#29484c!important}.stSidebar{background:#101415!important}.stSidebar [data-testid="stSidebarContent"]{background:#101415}.stExpander{border:1px solid #3c4749!important;border-radius:0!important;background:#111516}@keyframes moon-drift{to{transform:translate(-12px,8px)}}@keyframes signal{0%,100%{opacity:.4}50%{opacity:1}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;scroll-behavior:auto!important}}@media(max-width:760px){.block-container{padding:0.8rem}.lunar-hero{min-height:360px;padding:25px 22px}.lunar-hero:after{width:360px;height:360px;right:-180px;top:50px;opacity:.38}.hero-readout{left:22px;right:22px;bottom:20px;width:auto}.mission-status{grid-template-columns:1fr 1fr}.mission-status div{border-bottom:1px solid #30393b}.pipeline-nav{display:block}.pipeline-stage{text-align:left;padding-left:18px;border-right:0;border-bottom:1px solid #30393b}.pipeline-stage.active:after{left:0;right:auto;top:0;bottom:0;width:2px;height:auto}}
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+    :root {--panel:rgba(12,29,36,.90);--line:rgba(157,214,224,.24);--muted:#94adb5;--ice:#e5fbfd;--cyan:#71dae6;--lime:#b8f1a2;}
+    .stApp {background:radial-gradient(circle at 84% -4%,rgba(85,201,214,.15),transparent 29rem),radial-gradient(circle at 5% 38%,rgba(143,105,191,.11),transparent 28rem),linear-gradient(135deg,#061015,#0b1a21 52%,#071116);color:var(--ice);font-family:'Inter',sans-serif;}
+    .stApp:before {content:"";position:fixed;inset:0;pointer-events:none;opacity:.32;background-image:linear-gradient(rgba(177,232,238,.032) 1px,transparent 1px),linear-gradient(90deg,rgba(177,232,238,.032) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,black,transparent 78%);}
+    #MainMenu,footer {visibility:hidden}.block-container {padding:1.35rem 2.1rem 4rem;max-width:1600px}h1,h2,h3 {letter-spacing:-.04em;color:var(--ice)}h2 {font-size:clamp(1.65rem,2.8vw,2.35rem)!important}button:focus-visible,[role="tab"]:focus-visible {outline:2px solid var(--cyan)!important;outline-offset:3px}
+    .lunar-hero {position:relative;overflow:hidden;min-height:360px;padding:42px 46px;margin:4px 0 14px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(112deg,rgba(18,38,47,.97),rgba(9,21,27,.90));box-shadow:0 24px 75px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.05);isolation:isolate}.lunar-hero:before {content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,transparent 0 52%,rgba(99,216,229,.06)),repeating-linear-gradient(-26deg,transparent 0 32px,rgba(155,231,239,.035) 33px 34px)}.lunar-hero:after {content:"";position:absolute;right:-4%;top:-34%;height:560px;width:560px;z-index:-1;border-radius:50%;background:radial-gradient(circle at 37% 32%,#d7d9d1 0 1%,#788788 2% 4%,#c1c7c0 5% 7%,#536062 8% 12%,#939d98 13% 17%,#384346 18% 24%,#77847f 25% 31%,#293337 32% 40%,#596560 41% 52%,#182126 53% 100%);filter:contrast(1.18) grayscale(1);opacity:.72;box-shadow:inset -45px -40px 80px #081317;animation:moon-drift 18s ease-in-out infinite alternate}.hero-kicker,.eyebrow {font:600 .7rem 'JetBrains Mono',monospace;letter-spacing:.18em;color:var(--cyan);text-transform:uppercase}.lunar-hero h1 {max-width:720px;margin:.55rem 0;font-size:clamp(3.2rem,6.7vw,6.7rem);line-height:.8;font-weight:700;text-shadow:0 4px 30px rgba(0,0,0,.25)}.hero-sub {max-width:600px;font:500 clamp(.78rem,1.4vw,1rem) 'JetBrains Mono',monospace;letter-spacing:.1em;line-height:1.6;color:#d4e9e8}.hero-copy {max-width:510px;margin-top:17px;color:#adc3c5;line-height:1.6}.hero-readout {position:absolute;right:30px;bottom:28px;width:min(36vw,400px);padding:15px 16px;border:1px solid rgba(157,220,227,.42);border-radius:11px;background:rgba(4,15,20,.72);backdrop-filter:blur(10px);font:500 .67rem 'JetBrains Mono',monospace;letter-spacing:.04em;line-height:1.6;color:#c9d6d4;box-shadow:0 12px 30px rgba(0,0,0,.22)}.hero-readout span {color:var(--cyan)}.orbital {position:absolute;width:620px;height:230px;right:-40px;bottom:-62px;border:1px solid rgba(115,219,230,.46);border-radius:50%;transform:rotate(-18deg);z-index:-1}.orbital:after {content:"";position:absolute;width:9px;height:9px;border-radius:50%;background:#bff7fc;left:26%;top:4%;box-shadow:0 0 0 5px rgba(156,219,227,.16),0 0 20px #75dce7}.mission-status {display:grid;grid-template-columns:repeat(5,1fr);margin:0 0 25px;border:1px solid var(--line);border-radius:13px;background:rgba(11,27,34,.78);overflow:hidden;box-shadow:0 14px 36px rgba(0,0,0,.14)}.mission-status div {padding:14px 17px;border-right:1px solid var(--line);min-width:0}.mission-status div:last-child {border-right:0}.mission-status b {display:block;font:600 .62rem 'JetBrains Mono',monospace;letter-spacing:.12em;color:#78959e}.mission-status span {display:block;font:600 .76rem 'JetBrains Mono',monospace;color:#e8f5f4;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ready-dot {color:var(--lime)!important}
+    .telemetry-bar {background:rgba(12,31,38,.72);border:1px solid var(--line);border-radius:12px;padding:11px 18px;margin-bottom:21px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center}.telemetry-item {font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:6px}.telemetry-val {color:var(--cyan);font-weight:600}.status-dot {width:8px;height:8px;border-radius:50%;background:var(--lime);display:inline-block;box-shadow:0 0 0 4px rgba(182,239,155,.1),0 0 12px rgba(182,239,155,.45)}
+    .mission-card {background:linear-gradient(145deg,rgba(21,43,52,.9),rgba(10,25,32,.92));border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 12px 30px rgba(0,0,0,.13);transition:transform .2s ease,border-color .2s ease}.mission-card:hover {transform:translateY(-2px);border-color:rgba(103,216,229,.52)}.mission-header {font-family:'JetBrains Mono',monospace;font-size:.76rem;font-weight:600;color:var(--cyan);text-transform:uppercase;letter-spacing:.1em;margin-bottom:11px;border-bottom:1px solid var(--line);padding-bottom:8px}.metric-badge {font-family:'JetBrains Mono',monospace;padding:4px 10px;border-radius:999px;font-size:.78rem;font-weight:600;display:inline-block}.badge-green {background:rgba(34,197,94,.15);color:#8ff0a4;border:1px solid rgba(34,197,94,.3)}.badge-cyan {background:rgba(56,189,248,.15);color:#74dcff;border:1px solid rgba(56,189,248,.3)}.badge-yellow {background:rgba(234,179,8,.15);color:#f8d36d;border:1px solid rgba(234,179,8,.3)}.badge-purple {background:rgba(168,85,247,.15);color:#d0a8ff;border:1px solid rgba(168,85,247,.3)}.badge-red {background:rgba(239,68,68,.15);color:#ff9292;border:1px solid rgba(239,68,68,.3)}
+    .timeline-container {display:flex;justify-content:space-between;margin-bottom:20px;background:var(--panel);padding:12px;border-radius:13px;border:1px solid var(--line)}.timeline-step {text-align:center;flex:1;font-family:'JetBrains Mono',monospace;font-size:.76rem}.timeline-step.active {color:var(--cyan);font-weight:700}.timeline-step.done {color:var(--lime)}.pipeline-nav {display:flex;align-items:stretch;margin:0 0 22px;border:1px solid var(--line);border-radius:13px;background:rgba(10,26,33,.78);overflow:auto}.pipeline-stage {min-width:125px;position:relative;padding:14px 10px 12px;text-align:center;border-right:1px solid var(--line)}.pipeline-stage:last-child {border:0}.pipeline-stage strong {display:block;font:600 .69rem 'JetBrains Mono',monospace;letter-spacing:.08em}.pipeline-stage small {display:block;color:#829da5;font-size:.68rem;margin-top:4px}.pipeline-stage .pipe-dot {display:inline-block;color:#587078;margin-right:4px}.pipeline-stage.complete .pipe-dot {color:var(--lime)}.pipeline-stage.active {background:linear-gradient(180deg,rgba(78,185,196,.16),rgba(78,185,196,.04))}.pipeline-stage.active:after {content:"";position:absolute;height:3px;left:16px;right:16px;bottom:0;border-radius:3px;background:var(--cyan);animation:signal 1.4s ease-in-out infinite}.pipeline-stage.active .pipe-dot {color:var(--cyan)}.instrument-panel {border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:17px;margin-bottom:15px}.instrument-panel .panel-title {font:600 .73rem 'JetBrains Mono',monospace;letter-spacing:.12em;color:var(--cyan);border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:11px}.radar {width:170px;aspect-ratio:1;border-radius:50%;border:1px solid #7faab0;position:relative;margin:8px auto;background:repeating-radial-gradient(circle,transparent 0 24%,rgba(127,170,176,.14) 25% 26%),linear-gradient(45deg,transparent 49.5%,rgba(127,170,176,.22) 50% 50.7%,transparent 51%),linear-gradient(-45deg,transparent 49.5%,rgba(127,170,176,.22) 50% 50.7%,transparent 51%)}.radar:before {content:"";position:absolute;inset:28%;border-radius:50%;background:#9ad4dc;opacity:.75}.radar-label {text-align:center;font:600 .66rem 'JetBrains Mono',monospace;letter-spacing:.1em;color:#a8d6dd}
+    .stTabs [data-baseweb="tab-list"] {gap:6px;border-bottom:1px solid var(--line);padding-bottom:5px}.stTabs [data-baseweb="tab"] {background:rgba(8,21,27,.68);border:1px solid transparent;border-radius:9px;color:#9db5bb;padding:10px 13px}.stTabs [aria-selected="true"] {background:rgba(87,202,213,.13)!important;border-color:rgba(103,216,229,.45)!important;color:#e9ffff!important}.stButton>button {min-height:2.7rem;border-radius:9px!important;border:1px solid rgba(115,222,232,.65)!important;background:linear-gradient(135deg,#1b5862,#164047)!important;box-shadow:0 8px 20px rgba(0,0,0,.16);color:#efffff!important;font:600 .72rem 'JetBrains Mono',monospace;letter-spacing:.07em}.stButton>button:hover {transform:translateY(-1px);background:linear-gradient(135deg,#26717c,#1b525a)!important;border-color:#b4f7ff!important}.stSidebar {background:#09151b!important}.stSidebar [data-testid="stSidebarContent"] {background:linear-gradient(180deg,#0c1a20,#081318)}.stSidebar [data-testid="stSidebarHeader"] {background:transparent}.stExpander {border:1px solid var(--line)!important;border-radius:10px!important;background:rgba(13,30,37,.75)!important}@keyframes moon-drift {to {transform:translate(-12px,8px)}}@keyframes signal {0%,100% {opacity:.45}50% {opacity:1}}@media(prefers-reduced-motion:reduce) {*,*:before,*:after {animation:none!important;scroll-behavior:auto!important}}@media(max-width:760px) {.block-container {padding:.8rem}.lunar-hero {min-height:380px;padding:28px 23px}.lunar-hero:after {width:360px;height:360px;right:-180px;top:50px;opacity:.38}.hero-readout {left:22px;right:22px;bottom:20px;width:auto}.mission-status {grid-template-columns:1fr 1fr}.mission-status div {border-bottom:1px solid var(--line)}.pipeline-nav {display:block}.pipeline-stage {text-align:left;padding-left:18px;border-right:0;border-bottom:1px solid var(--line)}.pipeline-stage.active:after {left:0;right:auto;top:0;bottom:0;width:3px;height:auto}}
     </style>
     """,
     unsafe_allow_html=True,
@@ -350,8 +234,12 @@ else:  # Mode 2: Local Data Ingestion
         default_src_path = "data/samples/sample_ohrc.tif" if (SAMPLES_DIR / "sample_ohrc.tif").exists() else ""
         default_ref_path = "data/samples/sample_tmc2.tif" if (SAMPLES_DIR / "sample_tmc2.tif").exists() else ""
 
-        src_path_str = st.sidebar.text_input("Source File Path (.tif, .png, .img)", value=default_src_path)
-        ref_path_str = st.sidebar.text_input("Reference File Path (.tif, .png, .img)", value=default_ref_path)
+        src_path_str = st.sidebar.text_input("Source File Path (.tif, .png, .img, .jp2)", value=default_src_path)
+        ref_path_str = st.sidebar.text_input("Reference File Path (.tif, .png, .img, .jp2)", value=default_ref_path)
+        st.sidebar.caption(
+            "For ISRO/PDS products, place the calibrated raster and its original PDS4 XML/LBL label "
+            "in the same folder. The label is read automatically for footprint and geometry validation."
+        )
 
         if sample_file_names:
             st.sidebar.caption("Or pick built-in sample pairs:")
@@ -373,8 +261,10 @@ else:  # Mode 2: Local Data Ingestion
             st.info("👆 Please specify valid local file paths in the sidebar or pick a sample preset.")
 
     else:  # Drag & Drop Upload with SHA-256 Hash Verification
-        src_file = st.sidebar.file_uploader("Source Image (OHRC, TMC-2, or User Raster)", type=["tif", "tiff", "png", "jpg", "jpeg"])
-        ref_file = st.sidebar.file_uploader("Reference Image (LRO NAC, SELENE, etc.)", type=["tif", "tiff", "png", "jpg", "jpeg"])
+        src_file = st.sidebar.file_uploader("Source Image (OHRC, TMC-2, or User Raster)", type=["tif", "tiff", "png", "jpg", "jpeg", "img", "jp2"])
+        ref_file = st.sidebar.file_uploader("Reference Image (LRO NAC, SELENE, etc.)", type=["tif", "tiff", "png", "jpg", "jpeg", "img", "jp2"])
+        src_label = st.sidebar.file_uploader("Source PDS4 label (optional, .xml/.lbl)", type=["xml", "lbl"])
+        ref_label = st.sidebar.file_uploader("Reference PDS4 label (optional, .xml/.lbl)", type=["xml", "lbl"])
 
         if src_file and ref_file:
             def save_uploaded_file_secure(uploaded_f, prefix: str) -> Path:
@@ -404,9 +294,17 @@ else:  # Mode 2: Local Data Ingestion
 
             src_tmp = save_uploaded_file_secure(src_file, prefix="src")
             ref_tmp = save_uploaded_file_secure(ref_file, prefix="ref")
+            src_label_tmp = save_uploaded_file_secure(src_label, prefix="src_label") if src_label else None
+            ref_label_tmp = save_uploaded_file_secure(ref_label, prefix="ref_label") if ref_label else None
 
-            source_lunar = load_lunar_image(src_tmp, metadata_override={"sensor": sensor_src})
-            ref_lunar = load_lunar_image(ref_tmp, metadata_override={"sensor": sensor_ref})
+            source_lunar = load_lunar_image(src_tmp, metadata_override={
+                "sensor": sensor_src,
+                **({"pds4_label_path": str(src_label_tmp)} if src_label_tmp else {}),
+            })
+            ref_lunar = load_lunar_image(ref_tmp, metadata_override={
+                "sensor": sensor_ref,
+                **({"pds4_label_path": str(ref_label_tmp)} if ref_label_tmp else {}),
+            })
         else:
             st.info("👆 Please upload both a Source and a Reference lunar raster in the sidebar, or switch to Mode 0 / Mode 1.")
 
