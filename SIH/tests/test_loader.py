@@ -114,6 +114,36 @@ def test_user_override_provenance(tmp_path):
     assert meta["gsd_provenance"] == "USER_OVERRIDE"
 
 
+def test_metadata_reader_finds_nonmatching_pds4_label_and_retains_bbox(tmp_path):
+    """ISRO product labels may name their raster instead of sharing its stem."""
+    from metadata.reader import parse_lunar_metadata
+
+    raster = tmp_path / "CH2_12345.IMG.tif"
+    tifffile.imwrite(raster, np.zeros((8, 8), dtype=np.uint8))
+    (tmp_path / "product_observational.xml").write_text(
+        """<Product_Observational><File_Area_Observational><File><file_name>CH2_12345.IMG.tif</file_name></File></File_Area_Observational>
+        <Observation_Area><Investigation_Area><name>Chandrayaan-2</name></Investigation_Area></Observation_Area>
+        <Discipline_Area><Geometry><pixel_resolution>0.32</pixel_resolution></Geometry></Discipline_Area></Product_Observational>""",
+        encoding="utf-8",
+    )
+    metadata = parse_lunar_metadata(raster, user_override={"bbox": [10.0, 20.0, 11.0, 21.0]})
+    assert metadata["gsd"] == 0.32
+    assert metadata["gsd_provenance"] == "PDS4_XML"
+    assert metadata["bbox"] == [10.0, 20.0, 11.0, 21.0]
+
+
+def test_metadata_reader_accepts_explicit_uploaded_pds4_label(tmp_path):
+    from metadata.reader import parse_lunar_metadata
+
+    raster = tmp_path / "renamed_upload.tif"
+    label = tmp_path / "uploaded_label.xml"
+    tifffile.imwrite(raster, np.zeros((8, 8), dtype=np.uint8))
+    label.write_text("<Product_Observational><Geometry><pixel_resolution>0.5</pixel_resolution></Geometry></Product_Observational>")
+    metadata = parse_lunar_metadata(raster, user_override={"pds4_label_path": str(label)})
+    assert metadata["gsd"] == 0.5
+    assert "pds4_label_path" not in metadata
+
+
 def test_pds4_xml_parsing(tmp_path):
     from metadata.pds4_reader import parse_pds4_label
     pds4_xml_content = """<?xml version="1.0" encoding="UTF-8"?>
@@ -154,4 +184,3 @@ def test_pds4_xml_parsing(tmp_path):
     assert meta.sun_elevation == 24.8
     assert meta.gsd == 0.26
     assert meta.phase_angle is None
-

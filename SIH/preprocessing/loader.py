@@ -10,6 +10,30 @@ PIL.Image.MAX_IMAGE_PIXELS = None
 
 from metadata.reader import parse_lunar_metadata
 
+
+SUPPORTED_RASTER_SUFFIXES = {".tif", ".tiff", ".geotiff", ".png", ".jpg", ".jpeg", ".img", ".jp2"}
+
+
+def _read_with_rasterio(path: Path) -> np.ndarray | None:
+    """Read geospatial/PDS products through GDAL when rasterio is installed.
+
+    Rasterio's GDAL drivers support the GeoTIFF and PDS/ISIS products supplied
+    by planetary archives, retaining their native numerical samples.  It is an
+    optional dependency so browse images keep working in lightweight installs.
+    """
+    try:
+        import rasterio
+    except ImportError:
+        return None
+
+    with rasterio.open(path) as dataset:
+        data = dataset.read()
+    if data.ndim != 3:
+        return data
+    if data.shape[0] == 1:
+        return data[0]
+    return np.moveaxis(data, 0, -1)
+
 @dataclass
 class LunarImage:
     """Standardized planetary lunar raster object encapsulating data and metadata."""
@@ -163,9 +187,15 @@ def load_lunar_image(
     if not path.exists():
         raise FileNotFoundError(f"Lunar raster file not found: {path}")
 
-    # Read image data
+    # Read image data.  Try GDAL first for PDS/ISIS products and GeoTIFFs;
+    # tifffile/OpenCV/Pillow remain fast fallbacks for ordinary browse images.
     suffix = path.suffix.lower()
-    arr = None
+    arr = _read_with_rasterio(path) if suffix in {".img", ".jp2", ".geotiff"} else None
+    if suffix in {".img", ".jp2"} and arr is None:
+        raise ValueError(
+            f"{path.suffix} planetary product requires rasterio/GDAL. Install the optional "
+            "geospatial dependencies and keep its PDS4 XML/LBL label beside the raster."
+        )
     if suffix in [".tif", ".tiff", ".geotiff"]:
         try:
             arr = tifffile.imread(path)
