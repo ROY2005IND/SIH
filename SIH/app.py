@@ -43,30 +43,58 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Custom Aerospace Dark Theme CSS
+# Lunar mission-control visual system.  The data shown inside these surfaces is
+# still sourced from the pipeline below; CSS is intentionally presentation-only.
 st.markdown(
     """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
     .stApp {
-        background-color: #060a13;
+        background:
+          radial-gradient(circle at 78% 2%, rgba(116,136,147,.12), transparent 28rem),
+          linear-gradient(135deg, #080a0b 0%, #101416 58%, #090b0c 100%);
         color: #e2e8f0;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
+    .stApp:before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.25;
+        background-image:linear-gradient(rgba(177,196,202,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(177,196,202,.035) 1px,transparent 1px);
+        background-size:42px 42px; mask-image:linear-gradient(to bottom,black,transparent 80%); }
+    #MainMenu, footer {visibility:hidden;}
+    .block-container {padding-top:1.2rem; max-width:1540px;}
+    h1,h2,h3 { letter-spacing:-.035em; color:#f0f2ed; }
+    button:focus-visible, [role="tab"]:focus-visible {outline:2px solid #82c7d6!important; outline-offset:3px;}
+
+    /* Opening instrument plate */
+    .lunar-hero {position:relative; overflow:hidden; min-height:345px; padding:32px 37px; margin:4px 0 12px;
+      border:1px solid #465257; background:#131719; isolation:isolate;}
+    .lunar-hero:after {content:""; position:absolute; right:-6%; top:-56%; height:530px; width:530px; z-index:-1; border-radius:50%;
+      background:radial-gradient(circle at 37% 32%,#aeb6b0 0 1%,#77817e 2% 4%,#a6ada6 5% 7%,#59625f 8% 12%,#8c9490 13% 17%,#4d5554 18% 24%,#747d79 25% 31%,#353c3d 32% 40%,#555d5c 41% 52%,#252a2c 53% 100%);
+      filter:contrast(1.15) grayscale(1); opacity:.78; box-shadow:inset -40px -35px 70px #121718; animation:moon-drift 18s ease-in-out infinite alternate;}
+    .hero-kicker,.eyebrow {font:600 .7rem 'JetBrains Mono',monospace; letter-spacing:.17em; color:#a8d6dd; text-transform:uppercase;}
+    .lunar-hero h1 {max-width:690px; margin:.45rem 0 .3rem; font-size:clamp(2.7rem,6vw,6.1rem); line-height:.86; font-weight:700;}
+    .hero-sub {max-width:570px; font:500 clamp(.78rem,1.4vw,1rem) 'JetBrains Mono',monospace; letter-spacing:.08em; line-height:1.55; color:#c5cecc;}
+    .hero-copy {max-width:545px; margin-top:16px; color:#aeb9b8; line-height:1.55;}
+    .hero-readout {position:absolute; right:28px; bottom:24px; width:min(36vw,390px); padding:13px; background:rgba(8,11,12,.67); border:1px solid rgba(202,216,212,.35); font:500 .66rem 'JetBrains Mono',monospace; color:#c9d6d4;}
+    .hero-readout span {color:#81cbd7;}
+    .orbital {position:absolute; width:580px;height:210px;right:-40px;bottom:-55px;border:1px solid rgba(152,207,217,.43);border-radius:50%; transform:rotate(-18deg);z-index:-1;}
+    .orbital:after {content:""; position:absolute;width:8px;height:8px; border-radius:50%;background:#9cdbe3;left:26%;top:4%;box-shadow:0 0 0 4px rgba(156,219,227,.16);}
+    .mission-status {display:grid;grid-template-columns:repeat(5,1fr); border:1px solid #3c4749; background:#111516; margin-bottom:24px;}
+    .mission-status div {padding:12px 15px;border-right:1px solid #30393b; min-width:0;}
+    .mission-status div:last-child{border-right:0}.mission-status b{display:block;font:600 .64rem 'JetBrains Mono',monospace;letter-spacing:.12em;color:#7e9294}.mission-status span{display:block;font:600 .76rem 'JetBrains Mono',monospace;color:#e1e8e5;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ready-dot{color:#a6dba7!important;}
 
     /* Top Telemetry Banner */
     .telemetry-bar {
-        background: linear-gradient(90deg, #091024 0%, #0d1b38 50%, #091024 100%);
-        border: 1px solid #1e3a8a;
-        border-radius: 8px;
+        background: #121617;
+        border: 1px solid #384447;
+        border-radius: 0;
         padding: 10px 18px;
         margin-bottom: 20px;
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        box-shadow: none;
     }
     .telemetry-item {
         font-family: 'JetBrains Mono', monospace;
@@ -77,7 +105,7 @@ st.markdown(
         gap: 6px;
     }
     .telemetry-val {
-        color: #38bdf8;
+        color: #9dd6dd;
         font-weight: 600;
     }
     .status-dot {
@@ -86,14 +114,14 @@ st.markdown(
         border-radius: 50%;
         background-color: #22c55e;
         display: inline-block;
-        box-shadow: 0 0 10px #22c55e;
+        box-shadow: none;
     }
 
     /* Aerospace Cards */
     .mission-card {
-        background-color: #0a1122;
-        border: 1px solid #1e293b;
-        border-radius: 8px;
+        background-color: rgba(21,26,27,.94);
+        border: 1px solid #394447;
+        border-radius: 0;
         padding: 16px;
         margin-bottom: 16px;
     }
@@ -101,7 +129,7 @@ st.markdown(
         font-family: 'JetBrains Mono', monospace;
         font-size: 0.84rem;
         font-weight: 600;
-        color: #38bdf8;
+        color: #a1d5dc;
         text-transform: uppercase;
         letter-spacing: 0.08em;
         margin-bottom: 10px;
@@ -127,10 +155,10 @@ st.markdown(
         display: flex;
         justify-content: space-between;
         margin-bottom: 20px;
-        background: #0a1122;
+        background: #151a1b;
         padding: 12px;
-        border-radius: 8px;
-        border: 1px solid #1e293b;
+        border-radius: 0;
+        border: 1px solid #394447;
     }
     .timeline-step {
         text-align: center;
@@ -143,8 +171,9 @@ st.markdown(
         font-weight: 700;
     }
     .timeline-step.done {
-        color: #22c55e;
+        color: #b8d9b4;
     }
+    .pipeline-nav{display:flex;align-items:stretch;margin:0 0 20px;border-top:1px solid #3c4749;border-bottom:1px solid #3c4749;background:#111516;overflow:auto}.pipeline-stage{min-width:125px;position:relative;padding:14px 10px 12px;text-align:center;border-right:1px solid #30393b}.pipeline-stage:last-child{border:0}.pipeline-stage strong{display:block;font:600 .69rem 'JetBrains Mono',monospace;letter-spacing:.08em}.pipeline-stage small{display:block;color:#829094;font-size:.68rem;margin-top:4px}.pipeline-stage .pipe-dot{display:inline-block;color:#8b9898;margin-right:4px}.pipeline-stage.complete .pipe-dot{color:#b2d7ad}.pipeline-stage.active{background:#1a2628}.pipeline-stage.active:after{content:"";position:absolute;height:2px;left:12px;right:12px;bottom:0;background:#82c7d6;animation:signal 1.4s ease-in-out infinite}.pipeline-stage.active .pipe-dot{color:#91d5df}.instrument-panel{border:1px solid #3c4749;background:#111516;padding:16px;margin-bottom:15px}.instrument-panel .panel-title{font:600 .73rem 'JetBrains Mono',monospace;letter-spacing:.12em;color:#abd5da;border-bottom:1px solid #344043;padding-bottom:8px;margin-bottom:11px}.radar{width:170px;aspect-ratio:1;border-radius:50%;border:1px solid #7faab0;position:relative;margin:8px auto;background:repeating-radial-gradient(circle,transparent 0 24%,rgba(127,170,176,.14) 25% 26%),linear-gradient(45deg,transparent 49.5%,rgba(127,170,176,.22) 50% 50.7%,transparent 51%),linear-gradient(-45deg,transparent 49.5%,rgba(127,170,176,.22) 50% 50.7%,transparent)}.radar:before{content:"";position:absolute;inset:28%;border-radius:50%;background:#9ad4dc;opacity:.75}.radar-label{text-align:center;font:600 .66rem 'JetBrains Mono',monospace;letter-spacing:.1em;color:#a8d6dd}.stTabs [data-baseweb="tab-list"]{gap:3px;border-bottom:1px solid #3c4749}.stTabs [data-baseweb="tab"]{background:#111516;border:1px solid #3c4749;border-bottom:0;border-radius:0;color:#aab8b7;padding:9px 13px}.stTabs [aria-selected="true"]{background:#1b2729!important;color:#dcf0ef!important}.stButton>button{border-radius:0!important;border:1px solid #86c9d3!important;background:#1c3437!important;color:#e7f7f5!important;font:600 .72rem 'JetBrains Mono',monospace;letter-spacing:.06em}.stButton>button:hover{background:#29484c!important}.stSidebar{background:#101415!important}.stSidebar [data-testid="stSidebarContent"]{background:#101415}.stExpander{border:1px solid #3c4749!important;border-radius:0!important;background:#111516}@keyframes moon-drift{to{transform:translate(-12px,8px)}}@keyframes signal{0%,100%{opacity:.4}50%{opacity:1}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;scroll-behavior:auto!important}}@media(max-width:760px){.block-container{padding:0.8rem}.lunar-hero{min-height:360px;padding:25px 22px}.lunar-hero:after{width:360px;height:360px;right:-180px;top:50px;opacity:.38}.hero-readout{left:22px;right:22px;bottom:20px;width:auto}.mission-status{grid-template-columns:1fr 1fr}.mission-status div{border-bottom:1px solid #30393b}.pipeline-nav{display:block}.pipeline-stage{text-align:left;padding-left:18px;border-right:0;border-bottom:1px solid #30393b}.pipeline-stage.active:after{left:0;right:auto;top:0;bottom:0;width:2px;height:auto}}
     </style>
     """,
     unsafe_allow_html=True,
@@ -177,12 +206,29 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Header
-st.title("🛰️ LUNARMATCH AI")
-st.caption(
-    "Multi-Modal, Sun-Angle & Scale-Invariant Lunar Image Correspondence & Sub-Pixel Registration | "
-    "Indian Space Research Organisation (ISRO) Problem Statement #26166 | Offline-First Planetary Cartography Workstation"
+# Mission opening — the telemetry immediately below is derived from the local
+# runtime and configuration, rather than decorative operational statistics.
+st.markdown(
+    """
+    <section class="lunar-hero" aria-label="LUNARMATCH mission opening">
+      <div class="orbital"></div>
+      <div class="hero-kicker">ISRO SIH #26166 · PLANETARY IMAGING WORKSTATION</div>
+      <h1>LUNARMATCH<br>AI</h1>
+      <div class="hero-sub">MULTI-MODAL LUNAR IMAGE CORRESPONDENCE<br>&amp; SUB-PIXEL REGISTRATION</div>
+      <p class="hero-copy">Aligning lunar observations across sensors, scale, illumination and imaging conditions.</p>
+      <div class="hero-readout"><span>AOI / IMAGING FIELD</span><br>GRID: IMAGE-SPACE · GEOREFERENCE: INPUT-DEPENDENT<br>PIPELINE: DATA → FEATURES → GEOMETRY → VALIDATION</div>
+    </section>
+    """,
+    unsafe_allow_html=True,
 )
+hero_action, hero_pipeline = st.columns([1, 1])
+with hero_action:
+    if st.button("START REGISTRATION", type="primary", use_container_width=True):
+        st.session_state["hero_start_requested"] = True
+with hero_pipeline:
+    if st.button("EXPLORE PIPELINE", use_container_width=True):
+        st.session_state["hero_pipeline_requested"] = True
+        st.info("Configure input data and registration parameters in Mission Control, then initiate the pipeline.")
 
 # Top Navigation Tabs
 nav_selection = st.tabs([
@@ -204,6 +250,20 @@ mode = st.sidebar.radio(
     ],
     index=0,
     help="Core registration operates 100% offline without mandatory API or GPU access.",
+)
+
+data_label = "USER DATA" if mode.startswith("Mode 2") else "CONTROLLED LUNAR DATA"
+st.markdown(
+    f"""
+    <div class="mission-status" aria-label="Current mission status">
+      <div><b>MISSION SYSTEM</b><span class="ready-dot">● READY</span></div>
+      <div><b>DATA</b><span>{data_label}</span></div>
+      <div><b>REGISTRATION</b><span>AVAILABLE</span></div>
+      <div><b>MODELS</b><span>CLASSICAL / LEARNED PROBE</span></div>
+      <div><b>PROCESSING</b><span>{cuda_label}</span></div>
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
 
 source_lunar: LunarImage | None = None
@@ -410,12 +470,30 @@ enable_subpixel = st.sidebar.checkbox(
 
 btn_label = "⚡ EXECUTE GUIDED SHOWCASE" if mode.startswith("Mode 0") else "🚀 INITIATE REGISTRATION PIPELINE"
 run_pipeline_btn = st.sidebar.button(btn_label, type="primary", use_container_width=True)
+run_pipeline_btn = run_pipeline_btn or st.session_state.pop("hero_start_requested", False)
 
 
 # ==============================================================================
 # TAB 1: REGISTRATION WORKSTATION
 # ==============================================================================
 with nav_selection[0]:
+    has_result = "pipeline_result" in st.session_state
+    data_state = "complete" if source_lunar is not None and ref_lunar is not None else ""
+    result_state = "complete" if has_result else ""
+    st.markdown(
+        f"""
+        <div class="pipeline-nav" aria-label="Registration pipeline">
+          <div class="pipeline-stage {data_state}"><strong><span class="pipe-dot">{'●' if data_state else '○'}</span>DATA</strong><small>{'inputs ready' if data_state else 'awaiting inputs'}</small></div>
+          <div class="pipeline-stage {result_state}"><strong><span class="pipe-dot">{'●' if result_state else '○'}</span>METADATA</strong><small>{'evaluated' if result_state else 'on execution'}</small></div>
+          <div class="pipeline-stage {result_state}"><strong><span class="pipe-dot">{'●' if result_state else '○'}</span>FEATURES</strong><small>{'evaluated' if result_state else 'on execution'}</small></div>
+          <div class="pipeline-stage {result_state}"><strong><span class="pipe-dot">{'●' if result_state else '○'}</span>MATCHING</strong><small>{'evaluated' if result_state else 'on execution'}</small></div>
+          <div class="pipeline-stage {result_state}"><strong><span class="pipe-dot">{'●' if result_state else '○'}</span>GEOMETRY</strong><small>{'evaluated' if result_state else 'on execution'}</small></div>
+          <div class="pipeline-stage {result_state}"><strong><span class="pipe-dot">{'●' if result_state else '○'}</span>REFINEMENT</strong><small>{'evaluated' if result_state else 'on execution'}</small></div>
+          <div class="pipeline-stage {'active' if has_result else ''}"><strong><span class="pipe-dot">{'●' if has_result else '○'}</span>VALIDATION</strong><small>{'result ready' if has_result else 'pending'}</small></div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     if source_lunar is not None and ref_lunar is not None:
         # Pre-matching quality, metadata provenance, and overlap checks
         src_quality = analyze_image_quality(source_lunar)
@@ -747,6 +825,39 @@ with nav_selection[0]:
                             <div style="font-size: 0.78rem; color: #64748b; margin-top: 10px; font-style: italic;">
                                 * Note: {q_score.disclaimer}
                             </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+                # Registration Radar is deliberately a compact spatial index:
+                # its labels expose only measurements returned by this run.
+                radar_col, telemetry_col = st.columns([1, 3])
+                with radar_col:
+                    st.markdown(
+                        """
+                        <div class="instrument-panel">
+                          <div class="panel-title">REGISTRATION RADAR</div>
+                          <div class="radar" aria-hidden="true"></div>
+                          <div class="radar-label">RUN METRICS · NOT A CONFIDENCE SCORE</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                with telemetry_col:
+                    inlier_ratio = (metrics.inlier_count / metrics.tentative_matches * 100) if metrics.tentative_matches else 0.0
+                    st.markdown(
+                        f"""
+                        <div class="instrument-panel">
+                          <div class="panel-title">REGISTRATION TELEMETRY</div>
+                          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.6">
+                            <div><span style="color:#829094">INLIER RATIO</span><br><b>{inlier_ratio:.1f} %</b></div>
+                            <div><span style="color:#829094">SPATIAL COVERAGE</span><br><b>{max(0.0, metrics.spatial_coverage_pct):.1f} %</b></div>
+                            <div><span style="color:#829094">RESIDUAL RMSE</span><br><b>{metrics.rmse_px:.3f} px</b></div>
+                            <div><span style="color:#829094">CANDIDATE MATCHES</span><br><b>{metrics.tentative_matches}</b></div>
+                            <div><span style="color:#829094">VERIFIED INLIERS</span><br><b>{metrics.inlier_count}</b></div>
+                            <div><span style="color:#829094">PIPELINE TIME</span><br><b>{result.total_pipeline_time:.3f} s</b></div>
+                          </div>
                         </div>
                         """,
                         unsafe_allow_html=True,
