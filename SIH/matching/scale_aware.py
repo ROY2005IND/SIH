@@ -52,6 +52,33 @@ def _resize_keep_ar(img: np.ndarray, max_dim: int) -> tuple[np.ndarray, float]:
     return resized, sf
 
 
+def infer_isotropic_pixel_scale_ratio(
+    source_shape: tuple[int, int],
+    reference_shape: tuple[int, int],
+    minimum_ratio: float = 3.0,
+    tolerance: float = 1.5,
+) -> float | None:
+    """Infer a scale ratio only when raster dimensions support that inference.
+
+    Different image dimensions commonly mean different footprints, especially for
+    narrow OHRC strips and regional context images.  They must not be mistaken
+    for a pixel-scale change.  A ratio is therefore returned only when both axes
+    indicate the same enlargement within ``tolerance``.
+    """
+    source_h, source_w = source_shape[:2]
+    reference_h, reference_w = reference_shape[:2]
+    if min(source_h, source_w, reference_h, reference_w) <= 0:
+        return None
+
+    height_ratio = reference_h / source_h
+    width_ratio = reference_w / source_w
+    if min(height_ratio, width_ratio) < minimum_ratio:
+        return None
+    if max(height_ratio, width_ratio) / min(height_ratio, width_ratio) > tolerance:
+        return None
+    return float(np.sqrt(height_ratio * width_ratio))
+
+
 def _extract_sift(
     img: np.ndarray,
     n: int = 5000,
@@ -198,6 +225,7 @@ class ScaleAwareMatcher:
         source_u8: np.ndarray,
         reference_u8: np.ndarray,
         ransac_threshold: float = 3.0,
+        pixel_scale_ratio: float | None = None,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, float, dict]:
         """
         Returns
@@ -214,8 +242,37 @@ class ScaleAwareMatcher:
         h_s, w_s = source_u8.shape[:2]
         h_r, w_r = reference_u8.shape[:2]
 
-        # Pixel scale ratio: how many reference pixels per source pixel (>1 → ref coarser)
-        pixel_scale_ratio = max(h_r / max(h_s, 1), w_r / max(w_s, 1))
+        # Prefer a physical GSD-derived ratio supplied by the pipeline.  Raster
+        # dimensions alone are only safe when both axes show the same scale;
+        # otherwise they describe a different footprint, not pixel resolution.
+        if pixel_scale_ratio is None:
+            pixel_scale_ratio = infer_isotropic_pixel_scale_ratio(
+                (h_s, w_s), (h_r, w_r)
+            )
+        if pixel_scale_ratio is None:
+            diag["scale_aware_skipped"] = "incompatible image dimensions without GSD scale metadata"
+            logger.info(
+                "Scale-Aware Matcher skipped: image dimensions imply different "
+                "footprints rather than an isotropic pixel-scale ratio."
+            )
+            return (
+                np.empty((0, 2), dtype=np.float32),
+                np.empty((0, 2), dtype=np.float32),
+                np.empty((0,), dtype=np.float32),
+                time.perf_counter() - t0,
+                diag,
+            )
+
+        pixel_scale_ratio = float(pixel_scale_ratio)
+        if pixel_scale_ratio < 1.0:
+            diag["scale_aware_skipped"] = "reference is not coarser than source"
+            return (
+                np.empty((0, 2), dtype=np.float32),
+                np.empty((0, 2), dtype=np.float32),
+                np.empty((0,), dtype=np.float32),
+                time.perf_counter() - t0,
+                diag,
+            )
         diag["pixel_scale_ratio"] = round(pixel_scale_ratio, 2)
         logger.info(
             f"Scale-Aware Matcher: pixel_scale_ratio={pixel_scale_ratio:.2f}x "

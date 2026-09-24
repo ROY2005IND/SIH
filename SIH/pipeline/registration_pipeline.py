@@ -16,6 +16,7 @@ from preprocessing.illumination import apply_preprocessing, PreprocessingMode
 from analysis.image_quality import ImageQualityReport, analyze_image_quality
 from analysis.overlap import OverlapReport, estimate_overlap
 from matching.classical import ClassicalMatcher
+from matching.scale_aware import infer_isotropic_pixel_scale_ratio
 from matching.result import MatchResult
 from registration.model_selection import select_best_transformation_model
 from registration.transformation import TransformationModel, calculate_residuals
@@ -31,6 +32,14 @@ from evaluation.metrics import compute_registration_metrics, RegistrationMetrics
 from evaluation.quality_score import calculate_quality_score, LunarRegistrationQualityScore
 
 logger = get_logger("Pipeline")
+
+
+def _positive_gsd(value: object) -> float | None:
+    """Return a usable metres-per-pixel value, excluding metadata placeholders."""
+    if isinstance(value, (int, float)) and not isinstance(value, bool) and value > 0:
+        return float(value)
+    return None
+
 
 @dataclass
 class PipelineExecutionResult:
@@ -132,11 +141,18 @@ class RegistrationPipeline:
 
         # 4. Feature Matching
         t_stage = time.perf_counter()
-        # Detect pixel scale ratio — large ISRO strips (e.g. TMC-2 vs OHRC) often have >6x ratio
-        pixel_scale_ratio = max(
-            reference.height / max(source.height, 1),
-            reference.width  / max(source.width,  1),
-        )
+        # Prefer physical GSD metadata.  A large width/height difference can be
+        # a narrow strip inside a regional reference image, not a scale change.
+        source_gsd = _positive_gsd(source.gsd)
+        reference_gsd = _positive_gsd(reference.gsd)
+        if source_gsd is not None and reference_gsd is not None:
+            pixel_scale_ratio = reference_gsd / source_gsd
+            scale_ratio_source = "GSD metadata"
+        else:
+            pixel_scale_ratio = infer_isotropic_pixel_scale_ratio(
+                (source.height, source.width), (reference.height, reference.width)
+            )
+            scale_ratio_source = "consistent raster dimensions"
         scale_aware_diag: dict = {}
         effective_ransac = ransac_threshold
 
@@ -146,15 +162,20 @@ class RegistrationPipeline:
         scale_aware_confs:   np.ndarray = np.empty((0,),   dtype=np.float32)
         scale_aware_time: float = 0.0
 
-        if pixel_scale_ratio >= 3.0:
+        if pixel_scale_ratio is not None and pixel_scale_ratio >= 3.0:
             log_step(
                 f"Large pixel scale ratio detected ({pixel_scale_ratio:.1f}x). "
-                f"Activating Scale-Aware Coarse-to-Fine Matcher..."
+                f"Activating Scale-Aware Coarse-to-Fine Matcher ({scale_ratio_source})..."
             )
             from matching.scale_aware import ScaleAwareMatcher
             sa_matcher = ScaleAwareMatcher()
             scale_aware_src_pts, scale_aware_ref_pts, scale_aware_confs, scale_aware_time, scale_aware_diag = \
-                sa_matcher.find_matches(prep_src, prep_ref, ransac_threshold=ransac_threshold)
+                sa_matcher.find_matches(
+                    prep_src,
+                    prep_ref,
+                    ransac_threshold=ransac_threshold,
+                    pixel_scale_ratio=pixel_scale_ratio,
+                )
             log_step(
                 f"Scale-Aware Matcher: {len(scale_aware_src_pts)} correspondences found in {scale_aware_time:.2f}s "
                 f"(NCC conf={scale_aware_diag.get('ncc_confidence', 'n/a')}, ROI={scale_aware_diag.get('roi_native', 'full')})"
@@ -163,6 +184,11 @@ class RegistrationPipeline:
             effective_ransac = max(ransac_threshold, min(ransac_threshold * (pixel_scale_ratio / 3.0), ransac_threshold * 5.0))
             if effective_ransac != ransac_threshold:
                 log_step(f"RANSAC threshold relaxed to {effective_ransac:.1f}px for large-scale image pair.")
+        elif pixel_scale_ratio is None:
+            log_step(
+                "Scale-aware matching skipped: image dimensions indicate different "
+                "footprints and no numeric GSD metadata is available."
+            )
 
         log_step(f"Executing '{matcher_method.upper()}' correspondence matching...")
         hybrid_diag = None
@@ -500,6 +526,3 @@ class RegistrationPipeline:
             operating_state=operating_state,
             rejection_reason=rejection_reason,
         )
-
-
-
