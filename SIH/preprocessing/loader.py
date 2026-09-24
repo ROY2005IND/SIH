@@ -51,7 +51,10 @@ class LunarImage:
             if img.shape[2] == 1:
                 img_2d = img[:, :, 0]
             elif img.shape[2] == 3:
-                img_2d = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                # File-backed colour images are converted from OpenCV's BGR
+                # order to RGB during loading, so all LunarImage instances use
+                # RGB channel order here as well.
+                img_2d = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
             else:
                 mid_band = img.shape[2] // 2
                 img_2d = img[:, :, mid_band]

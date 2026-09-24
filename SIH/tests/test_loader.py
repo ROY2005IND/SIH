@@ -31,6 +31,19 @@ def test_lunar_image_dataclass():
     assert u8.min() >= 0
     assert u8.max() <= 255
 
+
+def test_rgb_lunar_image_uses_rgb_luminance_weights():
+    """Ensure in-memory RGB imagery is not interpreted as OpenCV BGR data."""
+    rgb = np.array([[[255, 0, 0], [0, 0, 255]]], dtype=np.uint8)
+    lunar_image = load_lunar_image(rgb)
+
+    grayscale = lunar_image.to_uint8()
+
+    expected = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
+    assert np.array_equal(grayscale, expected)
+    assert grayscale[0, 0] > grayscale[0, 1]
+
+
 def test_sensor_adapters():
     """Verify mission adapters extract known values and leave missing fields as 'Not available'."""
     ohrc_raw = {"gsd": 0.25, "sun_azimuth": 45.0}
@@ -154,4 +167,3 @@ def test_pds4_xml_parsing(tmp_path):
     assert meta.sun_elevation == 24.8
     assert meta.gsd == 0.26
     assert meta.phase_angle is None
-

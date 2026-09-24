@@ -7,6 +7,7 @@ from registration.transformation import apply_transformation, invert_transformat
 from registration.ransac import estimate_robust_transformation
 from registration.model_selection import select_best_transformation_model
 from registration.warping import warp_image_to_reference, compute_difference_map, create_alpha_overlay
+from matching.scale_aware import infer_isotropic_pixel_scale_ratio
 from demo.generator import generate_lunar_terrain, render_photometric_shading
 
 def test_classical_feature_extractors():
@@ -137,3 +138,11 @@ def test_collinear_points_fail_safely():
     )
     assert model in ("translation", "affine")
 
+
+def test_scale_ratio_inference_rejects_different_footprints():
+    """A narrow strip and a wide context raster are not an isotropic scale pair."""
+    assert infer_isotropic_pixel_scale_ratio((1280, 77), (622, 1244)) is None
+
+
+def test_scale_ratio_inference_accepts_consistent_resizing():
+    assert infer_isotropic_pixel_scale_ratio((200, 300), (800, 1200)) == 4.0
